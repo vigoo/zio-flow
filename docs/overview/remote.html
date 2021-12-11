@@ -1,0 +1,113 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Remote · zio-flow</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Remote Values"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Remote · zio-flow"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-flow/"/><meta property="og:description" content="# Remote Values"/><meta property="og:image" content="https://zio.github.io/zio-flow/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-flow/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-flow/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-flow/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-flow/css/main.css"/><script src="/zio-flow/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-flow/"><img class="logo" src="/zio-flow/img/navbar_brand2x.png" alt="zio-flow"/><h2 class="headerTitleWithLogo">zio-flow</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-flow/docs/overview/overview_index" target="_self">Overview</a></li><li class=""><a href="/zio-flow/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="api/index.html" target="_self">API</a></li><li class=""><a href="/zio-flow/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Remote</h1></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="remote-values"></a><a href="#remote-values" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Remote Values</h1>
+<p>The <code>Remote</code> data type forms the backbone of ZIO Flow and allows us to safely describe values that may be part of computations on multiple remote nodes.</p>
+<p>In ordinary Scala we are used to working with values defined by the Scala library such as <code>Int</code> and <code>String</code> as well as user defined data types such as a <code>User</code> and interfaces such as a <code>UserService</code>. The problem with using these data types in a distributed in a setting where we need to perform distributed or resilient workflows is that these data types may not actually be safely serializable and cause our programs to fail at runtime.</p>
+<p>Even if we are extremely diligent about trying to avoid this, it can be easy to avoid acidentally closing over other variables, resulting in data that is either not serializable or takes up much more space than we intended. This is an infamous problem with frameworks like Spark despite their best efforts to avoid it.</p>
+<p>ZIO Flow handles this issue in a principled way with its <code>Remote</code> data type, which is a <em>description</em> of a value that may potentially exist on a remote node. This way you can easily look at any value and tell just from its type whether it is a <code>Remote</code> value that is safe to use in resilient, distributed computations or an ordinary value that is fine to use on a single node but does not provide these guarantees.</p>
+<p>Generally ZIO Flow will require that the values we work with be <code>Remote</code> values so that it can safely replicate them across multiple nodes or reload them from durable storage in the event of a failure.</p>
+<p>For example, compare the signature of the <code>map</code> operator on <code>ZIO</code> and <code>ZFlow</code>:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.flow.remote._
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ZIO</span>[-<span class="hljs-type">R</span>, +<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">map</span></span>[<span class="hljs-type">B</span>](f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>): <span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">B</span>]
+}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ZFlow</span>[-<span class="hljs-type">R</span>, +<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">map</span></span>[<span class="hljs-type">B</span>](f: <span class="hljs-type">Remote</span>[<span class="hljs-type">A</span>] =&gt; <span class="hljs-type">Remote</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">ZFlow</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">B</span>]
+}
+</code></pre>
+<p>There are a couple of things that should jump out at you from this.</p>
+<p>First, the method signatures are nearly identical! You will find this frequently with ZIO Flow, where most of the operators you are familiar with from <code>ZIO</code> like <code>map</code> also exist on <code>ZFlow</code> so if you know ZIO you are already ready to go.</p>
+<p>Second, you will notice that the one thing that differs between these type signatures is that whereas <code>ZIO#map</code> accepts a function <code>A =&gt; B</code>, <code>ZFlow#map</code> accepts a function <code>Remote[A] =&gt; Remote[B]</code>. This makes sense because <code>ZIO</code> describes a workflow on a single machine whereas <code>ZFlow</code> describes a resilient, distributed, computation, so the values we are working with must be of the form <code>Remote[A]</code> rather than <code>A</code>.</p>
+<h1><a class="anchor" aria-hidden="true" id="working-with-remote-values"></a><a href="#working-with-remote-values" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Working With Remote Values</h1>
+<p>At this point you might be worried that despite these benefits, working with remote values could involve additional boilerplate. We know how to add two <code>Int</code> values, but how do we add two <code>Remote[Int]</code> values?</p>
+<p>Fortunately, ZIO Flow goes to great lengths to make working with <code>Remote</code> values as ergonomic as possible, so we can almost &quot;forget&quot; that we are working with something other than ordinary values at all.</p>
+<p>The main way ZIO Flow does this is by providing operators on remote values that mirror the operators on ordinary values. For example, we can add two <code>Remote[Int]</code> values by simply adding the two values together:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.flow._
+<span class="hljs-keyword">import</span> zio.flow.remote._
+<span class="hljs-keyword">import</span> zio.flow.zFlow._
+
+<span class="hljs-keyword">val</span> left: <span class="hljs-type">Remote</span>[<span class="hljs-type">Int</span>] = <span class="hljs-type">Remote</span>(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// left: Remote[Int] = Literal(</span>
+<span class="hljs-comment">//   value = 1,</span>
+<span class="hljs-comment">//   schema = Primitive(standardType = int, annotations = IndexedSeq())</span>
+<span class="hljs-comment">// )</span>
+<span class="hljs-keyword">val</span> right: <span class="hljs-type">Remote</span>[<span class="hljs-type">Int</span>] = <span class="hljs-type">Remote</span>(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// right: Remote[Int] = Literal(</span>
+<span class="hljs-comment">//   value = 1,</span>
+<span class="hljs-comment">//   schema = Primitive(standardType = int, annotations = IndexedSeq())</span>
+<span class="hljs-comment">// )</span>
+
+<span class="hljs-keyword">val</span> sum: <span class="hljs-type">Remote</span>[<span class="hljs-type">Int</span>] = left + right
+<span class="hljs-comment">// sum: Remote[Int] = AddNumeric(</span>
+<span class="hljs-comment">//   left = Literal(</span>
+<span class="hljs-comment">//     value = 1,</span>
+<span class="hljs-comment">//     schema = Primitive(standardType = int, annotations = IndexedSeq())</span>
+<span class="hljs-comment">//   ),</span>
+<span class="hljs-comment">//   right = Literal(</span>
+<span class="hljs-comment">//     value = 1,</span>
+<span class="hljs-comment">//     schema = Primitive(standardType = int, annotations = IndexedSeq())</span>
+<span class="hljs-comment">//   ),</span>
+<span class="hljs-comment">//   numeric = zio.flow.remote.Numeric$NumericInt$@6eb4e693</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>We see here that we can use the <code>apply</code> constructor on <code>Remote</code> to lift any existing value into a remote value as long as there is a <code>Schema</code> for it. We'll talk more about schemas below but you can think of a <code>Schema</code> as describing the &quot;structure&quot; of some Scala type as a value, allowing us to safely serialize it and deserialize it, among other things.</p>
+<p>In fact ZIO Flow will convert ordinary values into remote values for us automatically when needed. So we could also do this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> flow: <span class="hljs-type">ZFlow</span>[<span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZFlow</span>.succeed(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// flow: ZFlow[Any, Nothing, Int] = Return(</span>
+<span class="hljs-comment">//   value = Literal(</span>
+<span class="hljs-comment">//     value = 1,</span>
+<span class="hljs-comment">//     schema = Primitive(standardType = int, annotations = IndexedSeq())</span>
+<span class="hljs-comment">//   )</span>
+<span class="hljs-comment">// )</span>
+
+<span class="hljs-keyword">val</span> incrementedFlow: <span class="hljs-type">ZFlow</span>[<span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Int</span>] =
+  flow.map(_ + <span class="hljs-number">1</span>)
+<span class="hljs-comment">// incrementedFlow: ZFlow[Any, Nothing, Int] = Fold(</span>
+<span class="hljs-comment">//   value = Return(</span>
+<span class="hljs-comment">//     value = Literal(</span>
+<span class="hljs-comment">//       value = 1,</span>
+<span class="hljs-comment">//       schema = Primitive(standardType = int, annotations = IndexedSeq())</span>
+<span class="hljs-comment">//     )</span>
+<span class="hljs-comment">//   ),</span>
+<span class="hljs-comment">//   ifError = zio.flow.zFlow.ZFlow$$Lambda$10923/399189023@2b3ffafe,</span>
+<span class="hljs-comment">//   ifSuccess = zio.flow.zFlow.ZFlow$$Lambda$10922/462199021@761637ac</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>Notice that here the function we provided to <code>ZFlow#map</code> looked identical to the one we would provide to <code>ZIO#map</code> in a <code>ZIO</code> application. This is exactly the interface we want and lets use &quot;forget&quot; in most cases that we are working with the world of <code>Remote</code> values instead of the world of normal values.</p>
+<p>This also reflects the idea that the <code>Remote</code> world is a &quot;mirror&quot; of the world of ordinary values and absent underlying implementation limitations (e.g. arbitrary Scala functions are not serializable) the interface for working with <code>Remote</code> values should look and feel as similar to the interface for working with ordinary values as possible.</p>
+<p>This also means that if you know how to do something in ordinary Scala you also already know how to do it with <code>Remote</code> values.</p>
+<p>We are definitely working on ensuring that the experience of working with <code>Remote</code> values is as good as working with ordinary values. So if you see an area where this is not the case please reach out to us on Discord or open an issue so that we can improve it!</p>
+<h1><a class="anchor" aria-hidden="true" id="working-with-schemas"></a><a href="#working-with-schemas" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Working With Schemas</h1>
+<p>As discussed above, a <code>Schema</code> describes the &quot;structure&quot; of some Scala type as a value. This lets us know how to serialize and deserialize the value, as well as providing other useful functional like migrations between two versions of a data type.</p>
+<p>Schemas are provided by <code>ZIO Schema</code>, a library that is exclusively focused on defining these schemas, providing schemas for various data types, and enabling useful functionality with them. When we are working with data types defined by the Scala or Java standard libraries schemas should already automatically be available as long as the data type can be safely serialized and deserialized.</p>
+<p>ZIO Flow uses those schemas internally and as long as they exist things &quot;just work&quot;. So you may have noticed that we didn't have to do anything with schemas when we did <code>Remote(1)</code> because a schema for <code>Int</code> values already exists.</p>
+<p>The one time you will typically have to work with schemas directly is in defining schemas for your own custom data types. Fortunately this is very easy!</p>
+<p>In idiomatic Scala and in ZIO Flow we always define our data types as either a <code>case class</code> to represent data that has one thing <em>and</em> has another thing (e.g. a credit card has a name and a number) or a <code>sealed trait</code> to represent data that is one <em>or</em> is another thing (e.g. a payment method is either credit card or check).</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">PaymentMethod</span></span>
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreditCard</span>(<span class="hljs-params">name: <span class="hljs-type">String</span>, number: <span class="hljs-type">String</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">PaymentMethod</span></span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Check</span>(<span class="hljs-params">name: <span class="hljs-type">String</span>, routing: <span class="hljs-type">String</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">PaymentMethod</span></span>
+</code></pre>
+<p>Notice how even in this simple example we have combined these two techniques to model a more complex domain with both of these types.</p>
+<p>As long as we model our data this way, we can automatically generate schemas for our data types using the <code>DeriveSchema.gen</code> operator. For example, let's see how we could generate a schema for our <code>PaymentMethod</code> data type:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.schema._
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">PaymentMethod</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> schema: <span class="hljs-type">Schema</span>[<span class="hljs-type">PaymentMethod</span>] = <span class="hljs-type">DeriveSchema</span>.gen
+}
+</code></pre>
+<p>We should be sure to define our schemas in the companion objects of the data types they describe the structure of, like we did by putting the <code>schema</code> for <code>PaymentMethod</code> in the <code>PaymentMethod</code> companion object here. We should also declare it as an <code>implicit val</code> so that the compiler can automatically find the schema when needed.</p>
+<p>Other than that the hardest thing is remembering to import ZIO Schema!</p>
+<p>With the schema defined this way, we can construct remote versions of <code>PaymentMethod</code> values just like we did for <code>Int</code> values:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> remotePaymentMethod: <span class="hljs-type">Remote</span>[<span class="hljs-type">PaymentMethod</span>] =
+  <span class="hljs-type">Remote</span>(<span class="hljs-type">CreditCard</span>(<span class="hljs-string">"John Doe"</span>, <span class="hljs-string">"123456789"</span>))
+</code></pre>
+<p>With this, you know everything you need to work with remote values as part of writing your resilient, distributed application!</p>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-flow/" class="nav-home"><img src="/zio-flow/img/sidebar_brand2x.png" alt="zio-flow"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-flow" data-icon="octicon-star" data-count-href="/zio/zio-flow/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-flow//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-flow/api/index.html">Scaladoc of zio-flow</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>
