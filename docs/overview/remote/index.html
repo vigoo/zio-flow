@@ -53,7 +53,7 @@
 <span class="hljs-comment">//     value = 1,</span>
 <span class="hljs-comment">//     schema = Primitive(standardType = int, annotations = IndexedSeq())</span>
 <span class="hljs-comment">//   ),</span>
-<span class="hljs-comment">//   numeric = zio.flow.remote.Numeric$NumericInt$@4c1c2aea</span>
+<span class="hljs-comment">//   numeric = zio.flow.remote.Numeric$NumericInt$@70c55551</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>We see here that we can use the <code>apply</code> constructor on <code>Remote</code> to lift any existing value into a remote value as long as there is a <code>Schema</code> for it. We'll talk more about schemas below but you can think of a <code>Schema</code> as describing the &quot;structure&quot; of some Scala type as a value, allowing us to safely serialize it and deserialize it, among other things.</p>
@@ -76,8 +76,8 @@
 <span class="hljs-comment">//       schema = Primitive(standardType = int, annotations = IndexedSeq())</span>
 <span class="hljs-comment">//     )</span>
 <span class="hljs-comment">//   ),</span>
-<span class="hljs-comment">//   ifError = zio.flow.zFlow.ZFlow$$Lambda$10997/1209448505@1948d27f,</span>
-<span class="hljs-comment">//   ifSuccess = zio.flow.zFlow.ZFlow$$Lambda$10996/1874259497@28ca5c90</span>
+<span class="hljs-comment">//   ifError = zio.flow.zFlow.ZFlow$$Lambda$10926/379948634@1be7d4b2,</span>
+<span class="hljs-comment">//   ifSuccess = zio.flow.zFlow.ZFlow$$Lambda$10925/1614985984@5fbf5811</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>Notice that here the function we provided to <code>ZFlow#map</code> looked identical to the one we would provide to <code>ZIO#map</code> in a <code>ZIO</code> application. This is exactly the interface we want and lets use &quot;forget&quot; in most cases that we are working with the world of <code>Remote</code> values instead of the world of normal values.</p>
