@@ -11,7 +11,7 @@
 <p>ZIO Flow handles this issue in a principled way with its <code>Remote</code> data type, which is a <em>description</em> of a value that may potentially exist on a remote node. This way you can easily look at any value and tell just from its type whether it is a <code>Remote</code> value that is safe to use in resilient, distributed computations or an ordinary value that is fine to use on a single node but does not provide these guarantees.</p>
 <p>Generally ZIO Flow will require that the values we work with be <code>Remote</code> values so that it can safely replicate them across multiple nodes or reload them from durable storage in the event of a failure.</p>
 <p>For example, compare the signature of the <code>map</code> operator on <code>ZIO</code> and <code>ZFlow</code>:</p>
-<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.flow.remote._
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.flow._
 
 <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ZIO</span>[-<span class="hljs-type">R</span>, +<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">map</span></span>[<span class="hljs-type">B</span>](f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>): <span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">B</span>]
@@ -29,8 +29,6 @@
 <p>Fortunately, ZIO Flow goes to great lengths to make working with <code>Remote</code> values as ergonomic as possible, so we can almost &quot;forget&quot; that we are working with something other than ordinary values at all.</p>
 <p>The main way ZIO Flow does this is by providing operators on remote values that mirror the operators on ordinary values. For example, we can add two <code>Remote[Int]</code> values by simply adding the two values together:</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.flow._
-<span class="hljs-keyword">import</span> zio.flow.remote._
-<span class="hljs-keyword">import</span> zio.flow.zFlow._
 
 <span class="hljs-keyword">val</span> left: <span class="hljs-type">Remote</span>[<span class="hljs-type">Int</span>] = <span class="hljs-type">Remote</span>(<span class="hljs-number">1</span>)
 <span class="hljs-comment">// left: Remote[Int] = Literal(</span>
@@ -53,7 +51,7 @@
 <span class="hljs-comment">//     value = 1,</span>
 <span class="hljs-comment">//     schema = Primitive(standardType = int, annotations = IndexedSeq())</span>
 <span class="hljs-comment">//   ),</span>
-<span class="hljs-comment">//   numeric = zio.flow.remote.Numeric$NumericInt$@36ba795f</span>
+<span class="hljs-comment">//   numeric = zio.flow.remote.Numeric$NumericInt$@60da1d15</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>We see here that we can use the <code>apply</code> constructor on <code>Remote</code> to lift any existing value into a remote value as long as there is a <code>Schema</code> for it. We'll talk more about schemas below but you can think of a <code>Schema</code> as describing the &quot;structure&quot; of some Scala type as a value, allowing us to safely serialize it and deserialize it, among other things.</p>
@@ -70,7 +68,7 @@
 <span class="hljs-keyword">val</span> incrementedFlow: <span class="hljs-type">ZFlow</span>[<span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Int</span>] =
   flow.map(_ + <span class="hljs-number">1</span>)
 <span class="hljs-comment">// incrementedFlow: ZFlow[Any, Nothing, Int] = Apply(</span>
-<span class="hljs-comment">//   lambda = zio.flow.zFlow.ZFlow$$Lambda$11182/496751089@5801b7e</span>
+<span class="hljs-comment">//   lambda = zio.flow.ZFlow$$Lambda$11121/1821828471@2972e2f0</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>Notice that here the function we provided to <code>ZFlow#map</code> looked identical to the one we would provide to <code>ZIO#map</code> in a <code>ZIO</code> application. This is exactly the interface we want and lets use &quot;forget&quot; in most cases that we are working with the world of <code>Remote</code> values instead of the world of normal values.</p>
