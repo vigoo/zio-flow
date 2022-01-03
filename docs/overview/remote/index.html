@@ -51,7 +51,7 @@
 <span class="hljs-comment">//     value = 1,</span>
 <span class="hljs-comment">//     schema = Primitive(standardType = int, annotations = IndexedSeq())</span>
 <span class="hljs-comment">//   ),</span>
-<span class="hljs-comment">//   numeric = zio.flow.remote.Numeric$NumericInt$@4d621498</span>
+<span class="hljs-comment">//   numeric = zio.flow.remote.Numeric$NumericInt$@5f06df1d</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>We see here that we can use the <code>apply</code> constructor on <code>Remote</code> to lift any existing value into a remote value as long as there is a <code>Schema</code> for it. We'll talk more about schemas below but you can think of a <code>Schema</code> as describing the &quot;structure&quot; of some Scala type as a value, allowing us to safely serialize it and deserialize it, among other things.</p>
@@ -68,7 +68,7 @@
 <span class="hljs-keyword">val</span> incrementedFlow: <span class="hljs-type">ZFlow</span>[<span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Int</span>] =
   flow.map(_ + <span class="hljs-number">1</span>)
 <span class="hljs-comment">// incrementedFlow: ZFlow[Any, Nothing, Int] = Apply(</span>
-<span class="hljs-comment">//   lambda = zio.flow.ZFlow$$Lambda$11170/1403545191@465927c3</span>
+<span class="hljs-comment">//   lambda = zio.flow.ZFlow$$Lambda$11143/142000639@4994beab</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>Notice that here the function we provided to <code>ZFlow#map</code> looked identical to the one we would provide to <code>ZIO#map</code> in a <code>ZIO</code> application. This is exactly the interface we want and lets use &quot;forget&quot; in most cases that we are working with the world of <code>Remote</code> values instead of the world of normal values.</p>
@@ -101,4 +101,4 @@
   <span class="hljs-type">Remote</span>(<span class="hljs-type">CreditCard</span>(<span class="hljs-string">"John Doe"</span>, <span class="hljs-string">"123456789"</span>))
 </code></pre>
 <p>With this, you know everything you need to work with remote values as part of writing your resilient, distributed application!</p>
-</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-flow/" class="nav-home"><img src="/zio-flow/img/sidebar_brand2x.png" alt="zio-flow"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-flow" data-icon="octicon-star" data-count-href="/zio/zio-flow/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-flow//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-flow/api/index.html">Scaladoc of zio-flow</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-flow/" class="nav-home"><img src="/zio-flow/img/sidebar_brand2x.png" alt="zio-flow"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-flow" data-icon="octicon-star" data-count-href="/zio/zio-flow/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-flow//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-flow/api/index.html">Scaladoc of zio-flow</a></div></section><section class="copyright">Copyright © 2022 ZIO Maintainers</section></footer></div></body></html>
